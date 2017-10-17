@@ -2,6 +2,7 @@
 set -euo pipefail
 cd "$( dirname "${BASH_SOURCE[0]}" )"
 
+##
 ## Emits a line slice of command names found in the given dir.
 ##
 ## The pattern for command filenames is "cmd.*.sh".
@@ -24,8 +25,10 @@ function Fling_GetCommandsInDir {
 	)
 }
 
+##
 ## Emits the usage text (short form, e.g. the thing you get
 ## if you didn't give a command).
+##
 function Fling_Usage {
 	>&2 printf "fling v0.0.00 -- a command launcher.\n\n"
 
@@ -42,7 +45,9 @@ function Fling_Usage {
 	>&2 printf "\n"
 }
 
+##
 ## Main!
+##
 function Fling_Main {
 	Fling_Usage
 }
