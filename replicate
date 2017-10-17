@@ -1,0 +1,6 @@
+#!/bin/bash
+set -euo pipefail
+
+[ -z "${1:-}" ] && { >&2; printf "where?\n"; exit 1; }
+
+cp "$( dirname "${BASH_SOURCE[0]}" )"/fling "$1"
