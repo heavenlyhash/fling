@@ -36,17 +36,18 @@ function Fling_GetCommandsInDir {
 ## Use before `Fling_InvokeCommand` if you want to handle non-existence separately.
 ##
 function Fling_CheckCommand {
-	cmd="$1"
+	dir="$1"
+	cmd="$2"
+	shift 2 || true
 
 	## args validation
 	if [ "$(printf %q "$cmd")" != "$cmd" ]; then
 		>&2 printf "cannot possibly be a subcommand: too many strange chars!\n"
 		return 1
 	fi
-	cmdPath="./fling.d/cmd.$cmd.sh"
 
 	## check it exists
-	if [ ! -x "$cmdPath" ]; then
+	if [ ! -x "$dir/cmd.$cmd.sh" ]; then
 		>&2 printf "no such command \"%q\".\n" "$cmd"
 		return 1
 	fi
@@ -57,19 +58,26 @@ function Fling_CheckCommand {
 ##
 ## Invokes a subcommand.  Varargs expected, and will be passed on.
 ##
+## The subcommand script will be invoked with CWD set to its
+## own parent (subcommands are expected to load any library
+## files relative to themselves with a simple `source ./foo.shlib`).
+## The $FLING_BASE environment variable is provided to
+## refer back to the root dir of the project.
+##
 ## All the same rules for command name sanity are checked as
 ## they are in `Fling_GetCommandsInDir`.
 ##
 function Fling_InvokeCommand {
-	cmd="$1"
-	shift || true
+	dir="$1"
+	cmd="$2"
+	shift 2 || true
 
 	## args validation
-	Fling_CheckCommand "$cmd"
+	Fling_CheckCommand "$dir" "$cmd"
 
 	## go
 	export FLING_BASE=${FLING_BASE:-$PWD}
-	./fling.d/cmd.$cmd.sh
+	(cd "$dir" && ./cmd.$cmd.sh)
 }
 
 ##
@@ -105,13 +113,13 @@ function Fling_Main {
 		;;
 	*)
 		## try to find a matching subcommand, and call it.
-		Fling_CheckCommand "$cmd" || {
+		Fling_CheckCommand "fling.d" "$cmd" || {
 			## If not found, print usage.
 			>&2 printf "\n"
 			Fling_EmitUsage
 			exit 1
 		}
-		Fling_InvokeCommand "$cmd" "$@"
+		Fling_InvokeCommand "fling.d" "$cmd" "$@"
 		;;
 	esac
 }
