@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# `man bash` and grep down to "Programmable Completion" for more info.
+
 function _complete {
 	declare -a subcommands
 	for ((a=1; a < ${#COMP_WORDS[@]} ; a++)); do
@@ -7,8 +9,19 @@ function _complete {
 		if [ "--" == "${word:0:2}" ]; then
 			## The first long-opt means nothing further can be a subcommand.
 			## (Handling a `--longopt value` cannot be distinguished from a
-			## bool option with a subcommand like`--longopt subcmd`.  The
-			## `--longopt=value` syntax is less ambiguous, but not universal.
+			## bool option with a subcommand like`--longopt subcmd`.)
+			## This also catches a freestanding "--" and halts on it.
+			## There's one exception to this: `--longopt=value` syntax is
+			## not so ambiguous, so subcommands can continue after that.
+			## Parsing that last one is kind of bizarre because COMP_WORDS
+			## will contain `'--longopt' '=' 'value'` in that case (see
+			## also "COMP_WORDBREAKS" in `man bash`).
+			if [ "=" == ${COMP_WORDS[(($a+1))]} ]; then
+				((a+=2))
+				continue
+			else
+				printf "\n\t%q not wat\n" "$word"
+			fi
 			break
 		elif [ "-" == "${word:0:1}" ]; then
 			continue
