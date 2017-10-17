@@ -31,6 +31,48 @@ function Fling_GetCommandsInDir {
 }
 
 ##
+## Checks that a subcommand exists, printing a sensible error if not.
+##
+## Use before `Fling_InvokeCommand` if you want to handle non-existence separately.
+##
+function Fling_CheckCommand {
+	cmd="$1"
+
+	## args validation
+	if [ "$(printf %q "$cmd")" != "$cmd" ]; then
+		>&2 printf "cannot possibly be a subcommand: too many strange chars!\n"
+		return 1
+	fi
+	cmdPath="./fling.d/cmd.$cmd.sh"
+
+	## check it exists
+	if [ ! -x "$cmdPath" ]; then
+		>&2 printf "no such command \"%q\".\n" "$cmd"
+		return 1
+	fi
+	return 0
+}
+
+
+##
+## Invokes a subcommand.  Varargs expected, and will be passed on.
+##
+## All the same rules for command name sanity are checked as
+## they are in `Fling_GetCommandsInDir`.
+##
+function Fling_InvokeCommand {
+	cmd="$1"
+	shift || true
+
+	## args validation
+	Fling_CheckCommand "$cmd"
+
+	## go
+	export FLING_BASE=${FLING_BASE:-$PWD}
+	./fling.d/cmd.$cmd.sh
+}
+
+##
 ## Emits the usage text (short form, e.g. the thing you get
 ## if you didn't give a command).
 ##
@@ -63,11 +105,13 @@ function Fling_Main {
 		;;
 	*)
 		## try to find a matching subcommand, and call it.
-		# TODO
-		## If not found, print usage.
-		>&2 printf "no such command \"%q\".\n\n" "$cmd"
-		Fling_EmitUsage
-		exit 1
+		Fling_CheckCommand "$cmd" || {
+			## If not found, print usage.
+			>&2 printf "\n"
+			Fling_EmitUsage
+			exit 1
+		}
+		Fling_InvokeCommand "$cmd" "$@"
 		;;
 	esac
 }
