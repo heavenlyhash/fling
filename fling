@@ -34,9 +34,7 @@ function Fling_GetCommandsInDir {
 ## Emits the usage text (short form, e.g. the thing you get
 ## if you didn't give a command).
 ##
-function Fling_Usage {
-	>&2 printf "fling v0.0.00 -- a command launcher.\n\n"
-
+function Fling_EmitUsage {
 	>&2 printf "usage:\n\n"
 	>&2 printf "  fling <SUBCOMMAND>\n"
 	>&2 printf "  fling help\n"
@@ -54,6 +52,23 @@ function Fling_Usage {
 ## Main!
 ##
 function Fling_Main {
-	Fling_Usage
+	cmd=${1:-}
+	shift || true
+
+	case "$cmd" in
+	''|help)
+		>&2 printf "fling v0.0.00 -- a command launcher.\n\n"
+		Fling_EmitUsage
+		exit 1
+		;;
+	*)
+		## try to find a matching subcommand, and call it.
+		# TODO
+		## If not found, print usage.
+		>&2 printf "no such command \"%q\".\n\n" "$cmd"
+		Fling_EmitUsage
+		exit 1
+		;;
+	esac
 }
-Fling_Main
+Fling_Main "$@"
