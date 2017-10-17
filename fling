@@ -1,0 +1,49 @@
+#!/bin/bash
+set -euo pipefail
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+
+## Emits a line slice of command names found in the given dir.
+##
+## The pattern for command filenames is "cmd.*.sh".
+##
+## Commands may also declare flags, help text, and and other
+## similar autocomplete-helpful information in matching files
+## named "cmd.*.flingcfg"; to get this info for a command,
+## use `TODO`.
+## 
+function Fling_GetCommandsInDir {
+	dir=$1
+
+	while IFS= read -r -u3 -d $'\0' subcommand; do
+		if [ "$(printf %q "$subcommand")" != "$subcommand" ]; then continue; fi
+		subcommand="${subcommand#\./cmd\.}"
+		subcommand="${subcommand%\.sh}"
+		printf "%s\n" $subcommand
+	done 3< <(
+		cd "$dir" && find . -maxdepth 1 -type f -executable -name 'cmd.*.sh' -print0 
+	)
+}
+
+## Emits the usage text (short form, e.g. the thing you get
+## if you didn't give a command).
+function Fling_Usage {
+	>&2 printf "fling v0.0.00 -- a command launcher.\n\n"
+
+	>&2 printf "usage:\n\n"
+	>&2 printf "  fling <SUBCOMMAND>\n"
+	>&2 printf "  fling help\n"
+	>&2 printf "\n"
+
+	>&2 printf "subcommands:\n\n"
+	subcommands="$(Fling_GetCommandsInDir "fling.d")"
+	for subcommand in ${subcommands[@]}; do
+		>&2 printf "  - %s\n" $subcommand
+	done
+	>&2 printf "\n"
+}
+
+## Main!
+function Fling_Main {
+	Fling_Usage
+}
+Fling_Main
