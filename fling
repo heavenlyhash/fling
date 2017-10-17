@@ -11,6 +11,11 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 ## similar autocomplete-helpful information in matching files
 ## named "cmd.*.flingcfg"; to get this info for a command,
 ## use `TODO`.
+##
+## Command names are sanitychecked to print cleanly without
+## escaping.  You may safely use them in standard for-loops
+## with normal IFS, etc.  Uncooperative names are simply
+## excluded from the return.
 ## 
 function Fling_GetCommandsInDir {
 	dir=$1
