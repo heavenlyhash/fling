@@ -16,6 +16,8 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 ## escaping.  You may safely use them in standard for-loops
 ## with normal IFS, etc.  Uncooperative names are simply
 ## excluded from the return.
+##
+## The special command "cmd._.sh" will be skipped by this list.
 ## 
 function Fling_GetCommandsInDir {
 	dir=$1
@@ -24,6 +26,7 @@ function Fling_GetCommandsInDir {
 		if [ "$(printf %q "$subcommand")" != "$subcommand" ]; then continue; fi
 		subcommand="${subcommand#\./cmd\.}"
 		subcommand="${subcommand%\.sh}"
+		if [ "$subcommand" == "_" ]; then continue; fi
 		printf "%s\n" $subcommand
 	done 3< <(
 		cd "$dir" && find . -maxdepth 1 -type f -executable -name 'cmd.*.sh' -print0 
@@ -106,7 +109,16 @@ function Fling_Main {
 	shift || true
 
 	case "$cmd" in
-	''|help)
+	'')
+		Fling_CheckCommand "fling.d" "_" && {
+			Fling_InvokeCommand "fling.d" "_"
+		} || {
+			>&2 printf "fling v0.0.00 -- a command launcher.\n\n"
+			Fling_EmitUsage
+			exit 1
+		}
+		;;
+	help)
 		>&2 printf "fling v0.0.00 -- a command launcher.\n\n"
 		Fling_EmitUsage
 		exit 1
