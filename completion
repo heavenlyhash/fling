@@ -1,0 +1,24 @@
+#!/bin/bash
+
+function _complete {
+	declare -a subcommands
+	for ((a=1; a < ${#COMP_WORDS[@]} ; a++)); do
+		word=${COMP_WORDS[$a]}
+		if [ "--" == "${word:0:2}" ]; then
+			## The first long-opt means nothing further can be a subcommand.
+			## (Handling a `--longopt value` cannot be distinguished from a
+			## bool option with a subcommand like`--longopt subcmd`.  The
+			## `--longopt=value` syntax is less ambiguous, but not universal.
+			break
+		elif [ "-" == "${word:0:1}" ]; then
+			continue
+		fi
+		subcommands+=("$word")
+	done
+	echo ${subcommands[@]}
+	echo ---
+	local i=0
+	COMPREPLY[i++]="wrd"
+	COMPREPLY[i++]="bby"
+}
+complete -F _complete fling
