@@ -110,7 +110,7 @@ function Fling_Main {
 
 	case "$cmd" in
 	'')
-		Fling_CheckCommand "fling.d" "_" && {
+		Fling_CheckCommand "fling.d" "_" 2>/dev/null && {
 			Fling_InvokeCommand "fling.d" "_"
 		} || {
 			>&2 printf "fling v0.0.00 -- a command launcher.\n\n"
