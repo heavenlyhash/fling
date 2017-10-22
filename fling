@@ -18,7 +18,7 @@ cd "$( dirname "${BASH_SOURCE[0]}" )"
 ## excluded from the return.
 ##
 ## The special command "cmd._.sh" will be skipped by this list.
-## 
+##
 function Fling_GetCommandsInDir {
 	dir=$1
 
@@ -29,7 +29,7 @@ function Fling_GetCommandsInDir {
 		if [ "$subcommand" == "_" ]; then continue; fi
 		printf "%s\n" $subcommand
 	done 3< <(
-		cd "$dir" && find . -maxdepth 1 -type f -executable -name 'cmd.*.sh' -print0 
+		cd "$dir" && find . -maxdepth 1 -type f -executable -name 'cmd.*.sh' -print0
 	)
 }
 
