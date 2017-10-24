@@ -3,4 +3,4 @@ set -euo pipefail
 
 ./cmd.fmt.sh
 ./cmd.install.sh
-./cmd.test.sh
+VERBOSE=" " ./cmd.test.sh
