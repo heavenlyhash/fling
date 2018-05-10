@@ -4,4 +4,4 @@ set -euo pipefail
 
 source goprj.lib.shlib
 
-cd "$FLING_BASE"
+cd "$GOPATH/src/$GOPRJ_PKG"
